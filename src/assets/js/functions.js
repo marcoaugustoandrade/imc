@@ -15,7 +15,8 @@ function calcularIMC(peso, altura){
 
 let tabela = document.querySelector('.table');
 
-function addTabela(nome, peso, altura, imc){
+// function addTabela(nome, peso, altura, imc){
+function addTabela(nome, peso, altura, imc, indice){
   
   let colunaNome = document.createElement('td');
   colunaNome.innerHTML = nome;
@@ -37,7 +38,8 @@ function addTabela(nome, peso, altura, imc){
   
   btnDeletar.addEventListener("click", (event) => {
     event.preventDefault();
-    deletarLinha(this);
+    deletarLinha(indice);
+    // console.log(indice);
   });
   
   colunaDeletar.appendChild(btnDeletar);
@@ -53,16 +55,23 @@ function addTabela(nome, peso, altura, imc){
 }
 
 function limparTabela(){
-
+  let qtdLinhas = tabela.rows.length;
+  for (let i = qtdLinhas - 1; i > 0; i--){
+    tabela.deleteRow(i);
+  }
 }
 
-function deletarLinha(btn){
+function deletarLinha(index){
   
+  let pessoas = JSON.parse(localStorage.getItem("listaIMC"));
+  pessoas.splice(index, 1);
+  localStorage.setItem("listaIMC", JSON.stringify(pessoas));
+  carregarLocalStorage();
 }
 
 function addLocalStorage(nome, peso, altura, imc){
 
-  pessoa = {
+  let pessoa = {
     "nome": nome,
     "peso": peso,
     "altura": altura,
@@ -83,27 +92,18 @@ function addLocalStorage(nome, peso, altura, imc){
   }
 }
 
-
-// localStorage.setItem("pessoas", JSON.stringify(pessoas))
-// JSON.parse(localStorage.getItem("pessoas"))[0].nome
-
-function deletarLocalStorage(){
-
-}
-
-// Função carrega no load da página para popular a tabela com dados do localstorage
-function loadLocalStorage(){
+function carregarLocalStorage(){
   
   limparTabela();
 
   if (localStorage.getItem("listaIMC")){
     
-    listaIMC = localStorage.getItem("listaIMC");
-    console.log(listaIMC);
+    let listaIMC = JSON.parse(localStorage.getItem("listaIMC"));
+    listaIMC.forEach((pessoa, indice) => {
     // listaIMC.forEach((pessoa) => {
-    //   // Add na tabela
-    //   console.log(pessoa);
-    // });
+      // addTabela(pessoa.nome, pessoa.peso, pessoa.altura, pessoa.imc);
+      addTabela(pessoa.nome, pessoa.peso, pessoa.altura, pessoa.imc, indice);
+    });
   }
 }
 
@@ -112,6 +112,10 @@ document.querySelector("#btn-calcular").addEventListener("click", (event) => {
   event.preventDefault();
   let imc = calcularIMC(peso.value, altura.value);
   addLocalStorage(nome.value, peso.value, altura.value, imc);
-  addTabela(nome.value, peso.value, altura.value, imc);
+  // addTabela(nome.value, peso.value, altura.value, imc);
+  // Trocadopor carregarLocalStorage
+  carregarLocalStorage();
   limparForm();
 });
+
+window.onload =  carregarLocalStorage();
